@@ -1,0 +1,9 @@
+{
+  "name": "amdlite",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/000alen/amdlite.git",
+  "author": "Alen Rubilar <lclc.alen@gmail.com>",
+  "license": "MIT",
+  "packageManager": "yarn@4.5.0"
+}
