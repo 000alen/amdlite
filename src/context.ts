@@ -1,6 +1,7 @@
 import { ExportValue, FactoryFunction, GeneratorFunction } from "@/types";
 import { Module } from "@/module";
 import { E_REQUIRE_FAILED } from "@/constants";
+import { scopedEval } from "@/eval";
 
 const global = globalThis;
 
@@ -46,7 +47,7 @@ export class Context {
     let count: number = 0;
     let lastCount: number = 1;
 
-    var i: number,
+    let i: number,
       j: number,
       module: Module,
       factory: FactoryFunction,
@@ -174,8 +175,6 @@ export class Context {
     } else throw new Error(E_REQUIRE_FAILED);
   }
 
-  // Built-in dynamic modules
-
   public dynamic(id: string, generator: GeneratorFunction) {
     this.cache[id] = new Module(
       this,
@@ -186,5 +185,23 @@ export class Context {
       generator
     );
     this.loads[id] = true;
+  }
+
+  public loadFromCode(code: string): void {
+    const scope = {
+      define: this.define.bind(this),
+      require: this.require.bind(this),
+      dynamic: this.dynamic.bind(this),
+    };
+
+    scopedEval(scope, code);
+  }
+
+  public loadFromUrl(url: string) {
+    return fetch(url)
+      .then((response) => response.text())
+      .then((code) => {
+        this.loadFromCode(code);
+      });
   }
 }
