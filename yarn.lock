@@ -5,9 +5,9 @@ __metadata:
   version: 8
   cacheKey: 10c0
 
-"amdlite@workspace:.":
+"@000alen/amdlite@workspace:.":
   version: 0.0.0-use.local
-  resolution: "amdlite@workspace:."
+  resolution: "@000alen/amdlite@workspace:."
   dependencies:
     typescript: "npm:^5.6.3"
   languageName: unknown
