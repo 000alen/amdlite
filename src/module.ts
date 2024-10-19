@@ -1,8 +1,9 @@
-import { exportValues, getCached } from "@/utils";
-import { cache, global, loads, newModules } from "@/lib";
 import type { ExportValue, FactoryFunction, GeneratorFunction } from "@/types";
+import type { Context } from "@/context";
 
 export class Module {
+  context: Context;
+
   // Optional string identifying the module.
   id: string | undefined;
 
@@ -21,30 +22,29 @@ export class Module {
   // Optional function returning a dynamic export value for the module.
   generator: GeneratorFunction | undefined;
 
-  // Global object.
-  global: any;
-
   constructor(
+    context: Context,
     id: string | undefined,
     dependencies: Array<string> | undefined,
     factory: ((...args: any[]) => any) | undefined,
     exportValue: any | undefined,
     generator: ((module: Module) => any) | undefined
   ) {
+    this.context = context;
+
     this.id = id;
     this.dependencies = dependencies;
     this.factoryFunction = factory;
     this.exports = {};
     this.generator = generator;
-    this.global = global;
 
     if (!factory) {
       this.exportValue = exportValue || this.exports;
     }
 
     if (id) {
-      loads[id] = true;
-      cache[id] = this;
+      this.context.loads[id] = true;
+      this.context.cache[id] = this;
     }
   }
 
@@ -69,7 +69,7 @@ export class Module {
       }
 
       // load deps that haven't started loading yet
-      if (!loads.hasOwnProperty(id)) {
+      if (!this.context.loads.hasOwnProperty(id)) {
         this.loadScript(id);
       }
     }
@@ -81,7 +81,7 @@ export class Module {
     let dep: Module | undefined, i: number;
 
     for (i = dependencies.length; i--; ) {
-      dep = getCached(dependencies[i]);
+      dep = this.context.getCached(dependencies[i]);
       // if the dependency doesn't exist, it's not ready
       if (!dep) {
         return false;
@@ -107,7 +107,7 @@ export class Module {
   }
 
   getDependencyValue(id: string) {
-    const dep = getCached(id);
+    const dep = this.context.getCached(id);
 
     if (!dep) throw new Error(`Dependency ${id} not found`);
 
@@ -118,29 +118,37 @@ export class Module {
     const script = document.createElement("script"),
       parent = document.documentElement.children[0];
 
-    loads[id] = true;
+    this.context.loads[id] = true;
 
+    const _context = this.context;
     script.onload = function () {
       var hasDefinition; // anonymous or matching id
       let module: Module | undefined;
 
       // loading amd modules
-      while ((module = newModules.pop())) {
+      while ((module = _context.newModules.pop())) {
         if (!module.id || module.id == id) {
           hasDefinition = true;
           module.id = id;
         }
-        if (!getCached(module.id)) {
-          cache[module.id] = module;
+        if (!_context.getCached(module.id)) {
+          _context.cache[module.id] = module;
         }
       }
       // loading alien script
       if (!hasDefinition) {
-        module = new Module(id, undefined, undefined, undefined, undefined);
-        cache[id] = module;
+        module = new Module(
+          _context,
+          id,
+          undefined,
+          undefined,
+          undefined,
+          undefined
+        );
+        _context.cache[id] = module;
       }
       // set export values for modules that have all dependencies ready
-      exportValues();
+      _context.exportValues();
       parent.removeChild(script);
     };
 
