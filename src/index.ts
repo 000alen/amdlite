@@ -4,17 +4,17 @@ import { E_REQUIRE_FAILED } from "@/constants";
 import { cache, global, loads, newModules, pendingModules } from "@/lib";
 import { ExportValue, FactoryFunction, GeneratorFunction } from "@/types";
 
-function define(
+export function define(
   id: string,
   dependencies: Array<string>,
   factoryOrExport: FactoryFunction | ExportValue
 ): void;
-function define(
+export function define(
   dependencies: Array<string>,
   factoryOrExport: FactoryFunction | ExportValue
 ): void;
-function define(factoryOrExport: FactoryFunction | ExportValue): void;
-function define(
+export function define(factoryOrExport: FactoryFunction | ExportValue): void;
+export function define(
   idOrDependenciesOrFactoryOrExport:
     | string
     | Array<string>
@@ -71,9 +71,12 @@ function define(
 }
 
 // @ts-expect-error we're overloading the function here
-function require(dependency: string): ExportValue; // @ts-ignore
-function require(dependencies: Array<string>, callback: FactoryFunction): void; // @ts-ignore
-function require(
+export function require(dependency: string): ExportValue; // @ts-ignore
+export function require(
+  dependencies: Array<string>,
+  callback: FactoryFunction
+): void; // @ts-ignore
+export function require(
   dependencyOrDependencies: string | Array<string>,
   factory?: FactoryFunction
 ): ExportValue | void {
