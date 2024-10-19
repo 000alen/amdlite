@@ -13,4 +13,4 @@ export * from "@/context";
 export * from "@/module";
 export * from "@/constants";
 
-export { define, _require as require, dynamic };
+export { defaultContext, define, _require as require, dynamic };
