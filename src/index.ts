@@ -98,7 +98,7 @@ export function require(
 
 // Built-in dynamic modules
 
-function dynamic(id: string, generator: GeneratorFunction) {
+export function dynamic(id: string, generator: GeneratorFunction) {
   cache[id] = new Module(id, undefined, undefined, undefined, generator);
   loads[id] = true;
 }
